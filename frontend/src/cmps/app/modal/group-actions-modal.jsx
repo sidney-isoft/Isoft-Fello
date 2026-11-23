@@ -1,4 +1,4 @@
-import { React, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux'
 import { updateBoard, loadBoard } from '../../../store/actions/board.actions'
 import { store } from '../../../store/store'

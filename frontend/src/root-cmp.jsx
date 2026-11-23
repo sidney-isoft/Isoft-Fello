@@ -1,7 +1,6 @@
 //? Libraries
 import React from 'react'
 import { Routes, Route, useLocation } from 'react-router'
-import { Switch } from 'react-router-dom'
 //? Components
 import { AppHeader } from './cmps/app/app-header'
 import { UserDetails } from './pages/user/user-details'

@@ -1,5 +1,4 @@
 module.exports = {
-  dbURL:
-    'mongodb+srv://sidney48:8reWqeRIjtFqDRLi@fellocluster.koowot8.mongodb.net/?retryWrites=true&w=majority',
-  dbName: 'fello_db',
+  dbURL: process.env.MONGODB_URI,
+  dbName: process.env.MONGODB_DB_NAME,
 }

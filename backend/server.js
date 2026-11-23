@@ -16,26 +16,35 @@ const app = express()
 const http = require('http').createServer(app)
 const path = require('path')
 const SERVER_PORT = process.env.PORT || 3030
-
-//* Express App Config
-app.use(cookieParser())
-app.use(express.json())
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.resolve(__dirname, 'public')))
-} else {
-  const corsOptions = {
-    origin: [
+const isProduction = process.env.NODE_ENV === 'production'
+const allowedOrigins = isProduction
+  ? (process.env.FRONTEND_URL || '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  : [
       'http://127.0.0.1:8080',
       'http://localhost:8080',
       'http://127.0.0.1:3000',
       'http://localhost:3000',
       'http://localhost:3002',
       'http://localhost:3003',
-      'https://api.cloudinary.com/v1_1/cloud/image/upload'
-    ],
+    ]
+
+//* Express App Config
+app.use(cookieParser())
+app.use(express.json())
+if (isProduction && !allowedOrigins.length) {
+  throw new Error('FRONTEND_URL must be set in production')
+}
+app.use(
+  cors({
+    origin: allowedOrigins,
     credentials: true,
-  }
-  app.use(cors(corsOptions))
+  })
+)
+if (isProduction) {
+  app.use(express.static(path.resolve(__dirname, 'public')))
 }
 
 //* Routes

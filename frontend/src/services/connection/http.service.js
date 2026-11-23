@@ -1,7 +1,13 @@
 import Axios from 'axios'
 
-const BASE_URL =
-  process.env.NODE_ENV === 'production' ? '/api/' : '//localhost:3030/api/'
+const API_ORIGIN = process.env.REACT_APP_API_URL
+  ? process.env.REACT_APP_API_URL.replace(/\/+$/, '')
+  : ''
+const BASE_URL = API_ORIGIN
+  ? `${API_ORIGIN}/api/`
+  : process.env.NODE_ENV === 'production'
+    ? '/api/'
+    : '//localhost:3030/api/'
 
 var axios = Axios.create({
   withCredentials: true,

@@ -1,14 +1,11 @@
-//? Libraries
-const fs = require('fs')
 //? Services
 const asyncLocalStorage = require('./als.service')
 //? Private Variables
 const TIME_FORMAT = 'he'
-const logsDir = './logs'
 
 module.exports = {
   debug(...args) {
-    if (process.env.NODE_NEV === 'production') return
+    if (process.env.NODE_ENV === 'production') return
     doLog('DEBUG', ...args)
   },
   info(...args) {
@@ -20,10 +17,6 @@ module.exports = {
   error(...args) {
     doLog('ERROR', ...args)
   },
-}
-
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir)
 }
 
 //* Define the time format
@@ -46,7 +39,4 @@ function doLog(level, ...args) {
   const str = userId ? `(userId: ${userId})` : ''
   line = `${getTime()} - ${level} - ${line} ${str}\n`
   console.log(line)
-  fs.appendFile('./logs/backend.log', line, (err) => {
-    if (err) console.log('FATAL: cannot write to log file')
-  })
 }

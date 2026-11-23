@@ -31,7 +31,7 @@ function createSocketService() {
   var socket = null
   const socketService = {
     setup() {
-      socket = io(baseUrl)
+      socket = io(baseUrl, { transports: ['websocket'] })
       // setTimeout(() => {
       //   const board = boardService.get()
       //   if (board) this.login(board._id)

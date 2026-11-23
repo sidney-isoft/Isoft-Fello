@@ -63,7 +63,11 @@ app.get('/**', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
-//* Start the server on port: SERVER_PORT (3030)
-http.listen(SERVER_PORT, () => {
-  logger.info('Server is running on port:', SERVER_PORT)
-})
+if (process.env.VERCEL) {
+  module.exports = http
+} else {
+  //* Start the server on port: SERVER_PORT (3030)
+  http.listen(SERVER_PORT, () => {
+    logger.info('Server is running on port:', SERVER_PORT)
+  })
+}

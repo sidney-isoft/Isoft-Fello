@@ -4,7 +4,7 @@ import { getActionUpdateBoard } from '../../store/actions/board.actions'
 import { store } from '../../store/store'
 import { httpService } from '../connection/http.service'
 import { socketService, SOCKET_EMIT_BOARD_WATCH, SOCKET_EVENT_BOARD_UPDATED } from '../connection/socket.service'
-const BASE_URL = 'board/'
+const BASE_URL = 'board'
 
 export const boardService = {
   query,
@@ -63,7 +63,7 @@ async function query({
 async function get(boardId) {
   try {
     socketService.emit(SOCKET_EMIT_BOARD_WATCH, boardId)
-    return await httpService.get(BASE_URL + boardId)
+    return await httpService.get(`${BASE_URL}/${boardId}`)
   } catch (err) {
     console.log('Cannot find board', err)
     throw err
@@ -74,7 +74,7 @@ async function get(boardId) {
 async function save(board) {
   const { _id: boardId } = board
   try {
-    if (boardId) return await httpService.put(BASE_URL + boardId, board)
+    if (boardId) return await httpService.put(`${BASE_URL}/${boardId}`, board)
     return await httpService.post(BASE_URL, board)
   } catch (err) {
     console.log('Cannot update/create board', boardId, ':', err)
@@ -85,7 +85,7 @@ async function save(board) {
 //? Remove - Delete
 async function remove(boardId) {
   try {
-    return await httpService.delete(BASE_URL + boardId)
+    return await httpService.delete(`${BASE_URL}/${boardId}`)
   } catch (err) {
     console.log('Cannot remove board', boardId, ':', err)
     throw err
@@ -188,7 +188,7 @@ function getColors() {
 //? Board Member Permission Management
 async function updateMemberPermission(boardId, memberId, permission) {
   try {
-    return await httpService.put(`${BASE_URL}${boardId}/member/${memberId}/permission`, { permission })
+    return await httpService.put(`${BASE_URL}/${boardId}/member/${memberId}/permission`, { permission })
   } catch (err) {
     console.log('Cannot update member permission', err)
     throw err
@@ -197,7 +197,7 @@ async function updateMemberPermission(boardId, memberId, permission) {
 
 async function removeBoardMember(boardId, memberId) {
   try {
-    return await httpService.delete(`${BASE_URL}${boardId}/member/${memberId}`)
+    return await httpService.delete(`${BASE_URL}/${boardId}/member/${memberId}`)
   } catch (err) {
     console.log('Cannot remove board member', err)
     throw err

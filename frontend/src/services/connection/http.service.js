@@ -33,8 +33,9 @@ export const httpService = {
 
 async function ajax(endpoint, method = 'GET', data = null) {
   try {
+    const cleanEndpoint = endpoint.replace(/^\/+/, '').replace(/\/+$/, '')
     const res = await axios({
-      url: `${BASE_URL}${endpoint}`,
+      url: `${BASE_URL}${cleanEndpoint}`,
       method,
       data,
       params: method === 'GET' ? data : null,

@@ -20,16 +20,19 @@ export function AddBoardModal({ onCloseModal }) {
     ev.preventDefault()
     onCloseModal()
     try {
-      await addBoard(boardToAdd)
-      console.log('board saved', boardToAdd)
+      const savedBoard = await addBoard(boardToAdd)
+      console.log('board saved', savedBoard)
       showSuccessMsg('Board saved!')
-      // navigate(`/board/${boardToAdd._id}`)
+      if (savedBoard && savedBoard._id) {
+        navigate(`/board/${savedBoard._id}`)
+      } else {
+        navigate(`/board`)
+      }
     } catch (err) {
       console.log('err', err)
       showErrorMsg('Cannot save board')
+      navigate(`/board`)
     }
-    // navigate(`/board/${boardToAdd._id}`)
-    navigate(`/board`)
   }
 
   function changeBoard(imgUrl, color) {

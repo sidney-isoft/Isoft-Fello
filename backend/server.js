@@ -8,9 +8,9 @@ const setupAsyncLocalStorage = require('./middlewares/setupAls.middleware')
 const { setupSocketAPI } = require('./services/socket.service')
 const logger = require('./services/logger.service')
 //? Routes
-const authRoutes = require('./api/auth/auth.routes')
-const userRoutes = require('./api/user/user.routes')
-const boardRoutes = require('./api/board/board.routes')
+const authRoutes = require('./routes/auth/auth.routes')
+const userRoutes = require('./routes/user/user.routes')
+const boardRoutes = require('./routes/board/board.routes')
 //? Server Config
 const app = express()
 const http = require('http').createServer(app)

@@ -12,10 +12,11 @@ function getEmptyCredentials() {
   }
 }
 
-export function LoginSignup({ setUser }) {
-
+export function LoginSignup() {
   const [credentials, setCredentials] = useState(getEmptyCredentials())
   const [isSignupState, setIsSignupState] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const navigate = useNavigate()
 
@@ -29,87 +30,96 @@ export function LoginSignup({ setUser }) {
     ev.preventDefault()
     const funcs = { signup, login }
     const method = isSignupState ? 'signup' : 'login'
-
-    console.log('credentials', credentials);
+    setErrorMsg('')
+    setIsSubmitting(true)
 
     return funcs[method](credentials)
-      .then((user) => {
-        navigate('/board')
+      .then(() => navigate('/board'))
+      .catch((err) => {
+        setErrorMsg(
+          err.response?.data?.err || 'Unable to authenticate. Please try again.'
+        )
       })
-      .catch(err => {
-        console.log(err);
-      })
-
+      .finally(() => setIsSubmitting(false))
   }
 
   function onToggleSignupState() {
     setIsSignupState(!isSignupState)
+    setErrorMsg('')
   }
 
-
   const { username, password, fullname } = credentials
-  return <div className="login-page">
+  return (
+    <div className="login-page">
+      <div className="logo-section">
+        <img src={blueLogo} alt="logo" />
+        <h2
+          className="logo-name"
+          style={{ fontFamily: 'charlie-regular', margin: 0 }}
+        >
+          Fello
+        </h2>
+      </div>
 
-    <div className="logo-section">
-      <img src={blueLogo} alt="logo" />
-      <h2
-        className="logo-name"
-        style={{ fontFamily: 'charlie-regular', margin: 0 }}
-      >
-        Fello
-      </h2>
-    </div>
+      <div className="login-container">
+        <h1>{isSignupState ? 'Create your Fello account' : 'Log in to Fello'}</h1>
 
-    <div className="login-container">
+        <form className="login-form" onSubmit={onSubmit}>
+          <input
+            id="username"
+            type="text"
+            name="username"
+            value={username}
+            placeholder="Username"
+            onChange={handleCredentialsChange}
+            required
+            autoFocus
+          />
 
-      <h1>Log in to Fello</h1>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            value={password}
+            placeholder="Password"
+            onChange={handleCredentialsChange}
+            required
+          />
 
-      <form className="login-form" onSubmit={onSubmit}>
-        {/* <label htmlFor="username">Username</label> */}
-        <input
-          id="username"
-          type="text"
-          name="username"
-          value={username}
-          placeholder="Username"
-          onChange={handleCredentialsChange}
-          required
-          autoFocus
-        />
+          {isSignupState && (
+            <input
+              id="fullname"
+              type="text"
+              name="fullname"
+              value={fullname}
+              placeholder="Full name (optional)"
+              onChange={handleCredentialsChange}
+            />
+          )}
 
-        {/* <label htmlFor="password">Password</label> */}
-        <input
-          id="password"
-          type="password"
-          name="password"
-          value={password}
-          placeholder="Password"
-          onChange={handleCredentialsChange}
-          required
-        />
+          {errorMsg && (
+            <p className="login-error" role="alert">
+              {errorMsg}
+            </p>
+          )}
 
-        {/* {isSignupState && <label htmlFor="fullname">Fullname</label>} */}
-        {isSignupState && <input
-          id="fullname"
-          type="text"
-          name="fullname"
-          value={fullname}
-          placeholder="Full name"
-          onChange={handleCredentialsChange}
-          required
-        />}
+          <button className="login-btn" disabled={isSubmitting}>
+            {isSubmitting
+              ? 'Please wait...'
+              : isSignupState
+                ? 'Signup'
+                : 'Login'}
+          </button>
+        </form>
 
-        <button className='login-btn'>{isSignupState ? 'Signup' : 'Login'}</button>
-      </form>
+        <hr />
 
-      <hr />
-
-      <div className="btns">
-        <Link to="/login" onClick={onToggleSignupState}>
-          {isSignupState ? 'Already a member? Login' : 'New user? Signup here'}
-        </Link >
+        <div className="btns">
+          <Link to="/login" onClick={onToggleSignupState}>
+            {isSignupState ? 'Already a member? Login' : 'New user? Signup here'}
+          </Link>
+        </div>
       </div>
     </div>
-  </div >
-
+  )
 }

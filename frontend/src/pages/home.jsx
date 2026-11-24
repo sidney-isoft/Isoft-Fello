@@ -14,16 +14,15 @@ export function Home() {
 
   return (
     <>
-    { <AppHeader type={'home'} />}
-    {/* {!user && <AppHeader type={'home'} />} */}
+    {!user && <AppHeader type={'home'} />}
     <section className="home-section main-container main-layout">
       <div className="wave-container full">
         <div className="content-container">
           <div className="txt-container">
             <h1>Fello brings all your tasks, teammates, and tools together</h1>
             <p>Keep everything in the same place—even if your team isn't.</p>
-            <Link className="home-btn" to={'/board'}>
-              Start demo
+            <Link className="home-btn" to={user ? '/board' : '/login'}>
+              {user ? 'Go to your workspace' : 'Get started'}
             </Link>
           </div>
           <div className="img-container">
@@ -42,8 +41,8 @@ export function Home() {
             cards to get a clear view of who's doing what and what needs to get
             done.
           </p>
-          <Link className="home-btn" to={'/board'}>
-            Start
+          <Link className="home-btn" to={user ? '/board' : '/login'}>
+            {user ? 'Go to your workspace' : 'Get started'}
           </Link>
         </div>
         <img src={boardSvg} alt="boardSvg" />

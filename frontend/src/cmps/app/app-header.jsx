@@ -2,43 +2,50 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { CgMenuGridR } from 'react-icons/cg'
+import { useEffect, useRef, useState } from 'react'
 
 //? Routes
 import routes from '../../routes'
-import { useState } from 'react'
 import { BoardAdd } from '../workspace/board-add'
-import { FastAverageColor } from 'fast-average-color'
-import { useRef } from 'react'
 import blueLogo from '../../assets/img/header/trello-logo-blue.png'
 import { logout } from '../../store/actions/user.actions'
-import { SET_USER } from '../../store/reducers/user.reducer'
-import { useDispatch } from 'react-redux'
+import { showErrorMsg } from '../../services/connection/event-bus.service'
 
 export function AppHeader({ type }) {
-  const user = useSelector((storeState => storeState.userModule.user))
-  const fac = new FastAverageColor()
-  const boards = useSelector((storeState) => storeState.boardModule.boards)
+  const user = useSelector((storeState) => storeState.userModule.user)
   const board = useSelector((storeState) => storeState.boardModule.board)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const buttonRef = useRef()
+  const userMenuRef = useRef()
   const navigate = useNavigate()
-  const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (!isUserMenuOpen) return
+
+    function closeUserMenu(ev) {
+      if (!userMenuRef.current?.contains(ev.target)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('mousedown', closeUserMenu)
+    return () => window.removeEventListener('mousedown', closeUserMenu)
+  }, [isUserMenuOpen])
 
   function onCloseModal() {
     setIsModalOpen(!isModalOpen)
   }
 
-  function setUser(user) {
-    dispatch({ type: SET_USER, user })
-}
-
-  function onLogout() {
-    logout()
-        .then(() => {
-            setUser(null)
-        })
-    navigate('/')
-}
+  async function onLogout() {
+    try {
+      await logout()
+    } catch (err) {
+      showErrorMsg('Unable to log out. Please try again.')
+    } finally {
+      navigate('/login', { replace: true })
+    }
+  }
 
   switch (type) {
     case 'main':
@@ -72,12 +79,29 @@ export function AppHeader({ type }) {
         </div>
         </div>
         <div className="user-section">
-        { user && <img src={user.imgUrl} alt=""/>}
-        {/* {user && <button className="logout-btn" onClick={onLogout}>Logout</button>} */}
+          {user && (
+            <div className="user-menu-container" ref={userMenuRef}>
+              <button
+                className="user-menu-button"
+                type="button"
+                aria-label="Open account menu"
+                aria-expanded={isUserMenuOpen}
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              >
+                <img src={user.imgUrl} alt="" />
+              </button>
+              {isUserMenuOpen && (
+                <div className="user-menu" role="menu">
+                  <span className="user-menu-name">{user.fullname}</span>
+                  <button type="button" role="menuitem" onClick={onLogout}>
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>)
-     
-      break
     case 'home':
       return (<header
         className="app-header-home-section full"
@@ -94,7 +118,6 @@ export function AppHeader({ type }) {
         </div>
         <Link to="/login">Login</Link>
       </header>)
-      break
     default:
       return (console.log(`Cannot load component type: ${type}.`))
   }

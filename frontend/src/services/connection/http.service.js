@@ -1,8 +1,11 @@
 import Axios from 'axios'
 
-const API_ORIGIN = process.env.REACT_APP_API_URL
-  ? process.env.REACT_APP_API_URL.replace(/\/+$/, '')
-  : ''
+const API_ORIGIN =
+  process.env.NODE_ENV === 'production'
+    ? ''
+    : process.env.REACT_APP_API_URL
+      ? process.env.REACT_APP_API_URL.replace(/\/+$/, '')
+      : ''
 const BASE_URL = API_ORIGIN
   ? `${API_ORIGIN}/api/`
   : process.env.NODE_ENV === 'production'
@@ -38,14 +41,16 @@ async function ajax(endpoint, method = 'GET', data = null) {
     })
     return res.data
   } catch (err) {
-    console.log(
-      `Had Issues ${method}ing to the backend, endpoint: ${endpoint}, with data: `,
-      data
+    console.error(
+      `Request failed: ${method} ${endpoint} (${err.response?.status || 'network error'})`
     )
-    console.dir(err)
-    if (err.response && err.response.status === 401) {
+    if (
+      err.response?.status === 401 &&
+      !endpoint.startsWith('auth/login') &&
+      !endpoint.startsWith('auth/signup')
+    ) {
       sessionStorage.clear()
-      window.location.assign('/')
+      window.location.assign('/login')
     }
     throw err
   }

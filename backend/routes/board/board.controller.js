@@ -18,7 +18,7 @@ async function getBoards(req, res) {
   try {
     const { query } = req
     logger.debug('Getting Boards..')
-    const boards = await boardService.query(query)
+    const boards = await boardService.query(query, req.loggedinUser._id)
     logger.debug('Boards got successfully!')
     res.json(boards)
   } catch (err) {
@@ -31,9 +31,12 @@ async function getBoards(req, res) {
 async function getBoardById(req, res) {
   try {
     const boardId = req.params.id
-    // socketService.emitTo({ type: 'board-watch', data: board, label: board._id })
     logger.debug('Getting Board..', boardId)
-    const board = await boardService.getById(boardId)
+    const board = await boardService.getById(
+      boardId,
+      req.loggedinUser._id
+    )
+    if (!board) return res.status(404).send({ err: 'Board not found' })
     logger.debug('Board got successfully!', boardId)
     res.json(board)
   } catch (err) {
@@ -44,10 +47,24 @@ async function getBoardById(req, res) {
 
 //? Create - Save
 async function addBoard(req, res) {
-  //   const { loggedinboard } = req
   try {
-    const board = req.body
-    // board.owner = loggedinboard
+    const boardData = { ...req.body }
+    delete boardData._id
+    const owner = {
+      _id: req.loggedinUser._id.toString(),
+      fullname: req.loggedinUser.fullname,
+      imgUrl: req.loggedinUser.imgUrl,
+    }
+    if (typeof boardData.title !== 'string' || !boardData.title.trim()) {
+      return res.status(400).send({ err: 'Board title is required' })
+    }
+    const board = {
+      ...boardData,
+      title: boardData.title.trim(),
+      createdBy: owner,
+      members: [owner],
+      groups: [],
+    }
     logger.debug('Adding Board..')
     const addedBoard = await boardService.add(board)
     logger.debug('Board added successfully!')
@@ -61,10 +78,14 @@ async function addBoard(req, res) {
 //? Update - Edit
 async function updateBoard(req, res) {
   try {
-    const board = req.body
+    const board = { ...req.body, _id: req.params.id }
     const { _id: boardId } = board
     logger.debug('Updating Board..', boardId)
-    const updatedBoard = await boardService.update(board)
+    const updatedBoard = await boardService.update(
+      board,
+      req.loggedinUser._id
+    )
+    if (!updatedBoard) return res.status(404).send({ err: 'Board not found' })
     logger.debug('Board updated successfully!', boardId)
 
     socketService.emitTo({ type: 'board-updated', data: board })
@@ -82,9 +103,10 @@ async function removeBoard(req, res) {
   try {
     const boardId = req.params.id
     logger.debug('Removing Board..', boardId)
-    const removedId = await boardService.remove(boardId)
+    const removed = await boardService.remove(boardId, req.loggedinUser._id)
+    if (!removed) return res.status(404).send({ err: 'Board not found' })
     logger.debug('Board removed successfully!', boardId)
-    res.send(removedId)
+    res.send(boardId)
   } catch (err) {
     logger.error('Failed to remove board', err)
     res.status(500).send({ err: 'Failed to remove board' })
@@ -92,12 +114,12 @@ async function removeBoard(req, res) {
 }
 
 async function addBoardMsg(req, res) {
-  const { loggedinboard } = req
+  const { loggedinUser } = req
   try {
     const boardId = req.params.id
     const msg = {
       txt: req.body.txt,
-      by: loggedinboard,
+      by: loggedinUser,
     }
     const savedMsg = await boardService.addBoardMsg(boardId, msg)
     res.json(savedMsg)
@@ -108,7 +130,7 @@ async function addBoardMsg(req, res) {
 }
 
 async function removeBoardMsg(req, res) {
-  const { loggedinboard } = req
+  const { loggedinUser } = req
   try {
     const boardId = req.params.id
     const { msgId } = req.params

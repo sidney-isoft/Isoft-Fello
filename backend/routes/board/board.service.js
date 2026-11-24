@@ -15,11 +15,14 @@ module.exports = {
 };
 
 //? Query - List/Filtering/Sorting/Paging
-async function query(query) {
+async function query(query, ownerId) {
   try {
     //? DONE: FILTERING/SORTING/PAGING
     const sortCriteria = _buildSortCriteria(query);
-    const filterCriteria = _buildFilterCriteria(query);
+    const filterCriteria = {
+      ..._buildFilterCriteria(query),
+      "createdBy._id": ownerId.toString(),
+    };
     const collection = await dbService.getCollection(BOARDS_DB);
     let boards = await collection
       .find(filterCriteria)
@@ -37,8 +40,8 @@ async function query(query) {
 async function add(board) {
   try {
     const collection = await dbService.getCollection(BOARDS_DB);
-    await collection.insertOne(board);
-    return board;
+    const { insertedId } = await collection.insertOne(board);
+    return { ...board, _id: insertedId.toString() };
   } catch (err) {
     logger.error("Cannot insert board", err);
     throw err;
@@ -46,13 +49,12 @@ async function add(board) {
 }
 
 //? Update - Edit
-async function update(board) {
+async function update(board, ownerId) {
   try {
     const {
       title,
       archivedAt,
       createdAt,
-      createdBy,
       labels,
       style,
       members,
@@ -65,7 +67,6 @@ async function update(board) {
       title,
       archivedAt,
       createdAt,
-      createdBy,
       labels,
       style,
       members,
@@ -75,10 +76,14 @@ async function update(board) {
       lastViewed,
     };
     const collection = await dbService.getCollection(BOARDS_DB);
-    await collection.updateOne(
-      { _id: new ObjectId(board._id) },
+    const result = await collection.updateOne(
+      {
+        _id: new ObjectId(board._id),
+        "createdBy._id": ownerId.toString(),
+      },
       { $set: boardToSave }
     );
+    if (!result.matchedCount) return null;
     return board;
   } catch (err) {
     logger.error(`Cannot update board ${board.id}`, err);
@@ -87,10 +92,14 @@ async function update(board) {
 }
 
 //? Get - Read
-async function getById(boardId) {
+async function getById(boardId, ownerId) {
   try {
+    if (!ObjectId.isValid(boardId)) return null;
     const collection = await dbService.getCollection(BOARDS_DB);
-    const board = collection.findOne({ _id: new ObjectId(boardId) });
+    const board = await collection.findOne({
+      _id: new ObjectId(boardId),
+      "createdBy._id": ownerId.toString(),
+    });
     // TODO: Return error if boardId is not found
     return board;
   } catch (err) {
@@ -100,10 +109,15 @@ async function getById(boardId) {
 }
 
 //? Remove - Delete
-async function remove(boardId) {
+async function remove(boardId, ownerId) {
   try {
+    if (!ObjectId.isValid(boardId)) return false;
     const collection = await dbService.getCollection(BOARDS_DB);
-    await collection.deleteOne({ _id: new ObjectId(boardId) });
+    const result = await collection.deleteOne({
+      _id: new ObjectId(boardId),
+      "createdBy._id": ownerId.toString(),
+    });
+    if (!result.deletedCount) return false;
     // TODO: Return error if boardId is not found
     return boardId;
   } catch (err) {

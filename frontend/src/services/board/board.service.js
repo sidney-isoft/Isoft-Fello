@@ -4,17 +4,6 @@ import { getActionUpdateBoard } from '../../store/actions/board.actions'
 import { store } from '../../store/store'
 import { httpService } from '../connection/http.service'
 import { socketService, SOCKET_EMIT_BOARD_WATCH, SOCKET_EVENT_BOARD_UPDATED } from '../connection/socket.service'
-//? Private Variables
-const imgUrlMember1 =
-  'https://res.cloudinary.com/dqbvyn6b2/image/upload/v1674716783/member1_pf7spp.png'
-const imgUrlMember2 =
-  'https://res.cloudinary.com/dqbvyn6b2/image/upload/v1674716611/member2_cjjxdg.png'
-const imgUrlMember3 =
-  'https://res.cloudinary.com/dqbvyn6b2/image/upload/v1675009409/fotor_2023-1-29_18_22_36_ux4d5h.jpg'
-const imgUrlMember4 =
-  'https://res.cloudinary.com/dqbvyn6b2/image/upload/v1674983579/tomi_dlw150.jpg'
-const imgUrlMember5 =
-  'https://res.cloudinary.com/dqbvyn6b2/image/upload/v1675002237/roi1_ixjvze.jpg'
 const BASE_URL = 'board/'
 
 export const boardService = {
@@ -174,33 +163,7 @@ function getEmptyBoard() {
         color: '#5ba4cf',
       },
     ],
-    members: [
-      {
-        _id: 'u101',
-        fullname: 'Yael Tal',
-        imgUrl: imgUrlMember1,
-      },
-      {
-        _id: 'u102',
-        fullname: 'Sidney Sebban',
-        imgUrl: imgUrlMember2,
-      },
-      {
-        _id: 'u103',
-        fullname: 'Keren Siebner',
-        imgUrl: imgUrlMember3,
-      },
-      {
-        _id: 'u104',
-        fullname: 'Tomi Irma',
-        imgUrl: imgUrlMember4,
-      },
-      {
-        _id: 'u105',
-        fullname: 'Roi Yotvat',
-        imgUrl: imgUrlMember5,
-      },
-    ],
+    members: [],
   }
 }
 

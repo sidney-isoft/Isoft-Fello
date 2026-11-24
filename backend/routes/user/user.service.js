@@ -64,23 +64,16 @@ async function getByUsername(username) {
 async function add(user) {
   const { fullname, username, password, imgUrl, mentions } = user
   try {
-    // peek only updatable fields!
     const userToAdd = {
-      fullname: fullname,
-      username: username,
-      password: password,
-      imgUrl: imgUrl,
-      mentions: [
-        {
-          id: mentions?.id,
-          boardId: mentions?.boardId,
-          taskId: mentions?.taskId,
-        },
-      ],
+      fullname,
+      username,
+      password,
+      imgUrl,
+      mentions: mentions || [],
     }
     const collection = await dbService.getCollection(USERS_DB)
-    await collection.insertOne(userToAdd)
-    return userToAdd
+    const { insertedId } = await collection.insertOne(userToAdd)
+    return { ...userToAdd, _id: insertedId }
   } catch (err) {
     logger.error('Cannot add user', err)
     throw err

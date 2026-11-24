@@ -14,6 +14,4 @@ if (!config.dbURL || !config.dbName) {
   throw new Error('MONGODB_URI and MONGODB_DB_NAME must be set')
 }
 
-config.isGuestMode = true
-
 module.exports = config

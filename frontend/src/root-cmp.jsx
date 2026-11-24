@@ -1,6 +1,6 @@
 //? Libraries
 import React from 'react'
-import { Routes, Route, useLocation } from 'react-router'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 //? Components
 import { AppHeader } from './cmps/app/app-header'
 import { UserDetails } from './pages/user/user-details'
@@ -18,26 +18,31 @@ export function RootCmp() {
 
   const location = useLocation()
   const background = location.state && location.state.background
+  const protectedElement = (element) =>
+    user ? element : <Navigate to="/login" replace state={{ from: location }} />
+
   return (
     <div className="main-layout app">
-      {/* {user && <AppHeader type={'main'} />} */}
-      { <AppHeader type={'main'} />}
+      {user && <AppHeader type={'main'} />}
       <main>
         <Routes location={background || location}>
           <Route element={<Home />} path="/" />
-          <Route element={<BoardIndex />} path="/board/:boardId">
+          <Route element={protectedElement(<BoardIndex />)} path="/board/:boardId">
             <Route
-              element={<TaskDetails />}
+              element={protectedElement(<TaskDetails />)}
               path="/board/:boardId/group/:groupId/task/:taskId"
             />
           </Route>
-          <Route element={<UserDetails />} path="/user" />
-          <Route element={<LoginSignup />} path="/login" />
+          <Route element={protectedElement(<UserDetails />)} path="/user" />
+          <Route
+            element={user ? <Navigate to="/board" replace /> : <LoginSignup />}
+            path="/login"
+          />
           {routes.map((route) => (
             <Route
               key={route.path}
               exact={true}
-              element={route.component}
+              element={protectedElement(route.component)}
               path={route.path}
             />
           ))}
@@ -46,7 +51,7 @@ export function RootCmp() {
           <Routes>
             <Route
               path="/board/:boardId/group/:groupId/task/:taskId"
-              element={<TaskDetails />}
+              element={protectedElement(<TaskDetails />)}
             />
           </Routes>
         )}

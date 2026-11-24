@@ -2,7 +2,6 @@ export const utilService = {
   animateCSS,
   makeId,
   makeLorem,
-  getRandomMembers,
   getRandomLabels,
   getRandomColor,
   getRandomChosenColor,
@@ -73,12 +72,6 @@ function makeLorem(size = 100) {
   return txt
 }
 
-function getRandomMembers() {
-  const Members = ['u101', 'u102', 'u103']
-
-  const num = getRandomIntInclusive(1, Members.length)
-  return Members.slice(0, num)
-}
 function getRandomLabels() {
   const labels = ['l101', 'l102', 'l103', 'l104', 'l105', 'l106']
 

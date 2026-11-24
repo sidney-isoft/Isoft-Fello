@@ -20,7 +20,10 @@ export function boardReducer(state = initialState, action) {
   let board
   switch (action.type) {
     case SET_BOARDS:
-      newState = { ...state, boards: action.boards }
+      newState = {
+        ...state,
+        boards: Array.isArray(action.boards) ? action.boards : [],
+      }
       break
     case SET_BOARD:
       newState = {

@@ -19,11 +19,13 @@ module.exports = {
 async function getBoards(req, res) {
   try {
     const { query } = req
-    const { _id: userId, role } = req.loggedinUser
+    const loggedinUser = req.loggedinUser || {}
+    const userId = loggedinUser._id
+    const role = loggedinUser.role || (loggedinUser.isAdmin ? 'globalAdmin' : 'user')
     logger.debug('Getting Boards..')
     const boards = await boardService.query(query, userId, role)
     logger.debug('Boards got successfully!')
-    res.json(boards)
+    res.json(boards || [])
   } catch (err) {
     logger.error('Had issues while getting boards', err)
     res.status(500).send({ err: 'Had issues while getting boards' })
@@ -34,7 +36,9 @@ async function getBoards(req, res) {
 async function getBoardById(req, res) {
   try {
     const boardId = req.params.id
-    const { _id: userId, role } = req.loggedinUser
+    const loggedinUser = req.loggedinUser || {}
+    const userId = loggedinUser._id
+    const role = loggedinUser.role || (loggedinUser.isAdmin ? 'globalAdmin' : 'user')
     logger.debug('Getting Board..', boardId)
     const board = await boardService.getById(boardId, userId, role)
     if (!board) return res.status(404).send({ err: 'Board not found' })
@@ -82,7 +86,9 @@ async function updateBoard(req, res) {
   try {
     const board = { ...req.body, _id: req.params.id }
     const { _id: boardId } = board
-    const { _id: userId, role } = req.loggedinUser
+    const loggedinUser = req.loggedinUser || {}
+    const userId = loggedinUser._id
+    const role = loggedinUser.role || (loggedinUser.isAdmin ? 'globalAdmin' : 'user')
     logger.debug('Updating Board..', boardId)
     const updatedBoard = await boardService.update(board, userId, role)
     if (!updatedBoard) return res.status(404).send({ err: 'Board not found' })
@@ -101,7 +107,9 @@ async function updateBoard(req, res) {
 async function removeBoard(req, res) {
   try {
     const boardId = req.params.id
-    const { _id: userId, role } = req.loggedinUser
+    const loggedinUser = req.loggedinUser || {}
+    const userId = loggedinUser._id
+    const role = loggedinUser.role || (loggedinUser.isAdmin ? 'globalAdmin' : 'user')
     logger.debug('Removing Board..', boardId)
     const removed = await boardService.remove(boardId, userId, role)
     if (!removed) return res.status(404).send({ err: 'Board not found' })

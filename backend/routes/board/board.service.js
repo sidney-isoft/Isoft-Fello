@@ -18,24 +18,30 @@ module.exports = {
 
 //? Query - List/Filtering/Sorting/Paging
 // Returns boards owned by the user OR boards where the user is a member with any permission
-async function query(filterBy, userId, userRole) {
+async function query(filterBy = {}, userId, userRole) {
   try {
     //? DONE: FILTERING/SORTING/PAGING
-    const sortCriteria = _buildSortCriteria(filterBy);
-    const baseFilter = _buildFilterCriteria(filterBy);
+    const sortCriteria = _buildSortCriteria(filterBy || {});
+    const baseFilter = _buildFilterCriteria(filterBy || {});
 
     let filterCriteria;
     // Board admins & global admins see all boards; regular users only see their own, boards they were added to, or public boards
     if (userRole === "globalAdmin" || userRole === "boardAdmin") {
       filterCriteria = baseFilter;
     } else {
+      const orConditions = [{ isPublic: true }];
+      if (userId) {
+        const userIdStr = userId.toString();
+        orConditions.push({ "createdBy._id": userIdStr });
+        orConditions.push({ "members._id": userIdStr });
+        if (ObjectId.isValid(userId)) {
+          orConditions.push({ "createdBy._id": new ObjectId(userId) });
+          orConditions.push({ "members._id": new ObjectId(userId) });
+        }
+      }
       filterCriteria = {
         ...baseFilter,
-        $or: [
-          { "createdBy._id": userId.toString() },
-          { "members._id": userId.toString() },
-          { isPublic: true },
-        ],
+        $or: orConditions,
       };
     }
 
@@ -45,7 +51,7 @@ async function query(filterBy, userId, userRole) {
       .sort(sortCriteria)
       .toArray();
 
-    return _setPage(filterBy, boards);
+    return _setPage(filterBy || {}, boards || []) || [];
   } catch (err) {
     logger.error("Cannot find boards", err);
     throw err;
@@ -139,13 +145,19 @@ async function getById(boardId, userId, userRole) {
     if (userRole === "globalAdmin" || userRole === "boardAdmin") {
       matchQuery = { _id: new ObjectId(boardId) };
     } else {
+      const orConditions = [{ isPublic: true }];
+      if (userId) {
+        const userIdStr = userId.toString();
+        orConditions.push({ "createdBy._id": userIdStr });
+        orConditions.push({ "members._id": userIdStr });
+        if (ObjectId.isValid(userId)) {
+          orConditions.push({ "createdBy._id": new ObjectId(userId) });
+          orConditions.push({ "members._id": new ObjectId(userId) });
+        }
+      }
       matchQuery = {
         _id: new ObjectId(boardId),
-        $or: [
-          { "createdBy._id": userId.toString() },
-          { "members._id": userId.toString() },
-          { isPublic: true },
-        ],
+        $or: orConditions,
       };
     }
 
@@ -298,10 +310,11 @@ function _buildSortCriteria(filterBy) {
   return { [sortBy ? sortBy : "createdAt"]: sortValue ? 1 : -1 };
 }
 
-function _setPage(filterBy, boards) {
-  const { pageSize, pageIdx } = filterBy;
+function _setPage(filterBy = {}, boards = []) {
+  if (!Array.isArray(boards)) return [];
+  const { pageSize, pageIdx } = filterBy || {};
   if (!pageSize) return boards;
-  let startIdx = null;
-  if (pageIdx !== undefined) startIdx = pageIdx * +pageSize;
+  let startIdx = 0;
+  if (pageIdx !== undefined) startIdx = +pageIdx * +pageSize;
   return boards.slice(startIdx, +pageSize + startIdx);
 }

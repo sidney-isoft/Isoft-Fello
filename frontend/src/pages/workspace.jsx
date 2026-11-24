@@ -1,30 +1,23 @@
 import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { BoardList } from '../cmps/workspace/board-list'
 import {
   showErrorMsg,
   showSuccessMsg,
 } from '../services/connection/event-bus.service'
-import { AiOutlineStar } from 'react-icons/ai'
-import { AiOutlineClockCircle } from 'react-icons/ai'
+import { AiOutlineStar, AiOutlineClockCircle } from 'react-icons/ai'
 import { loadBoards } from '../store/actions/board.actions'
 import { Loader } from '../cmps/helpers/loader'
 import { UPDATE_BOARD } from '../store/reducers/board.reducer'
 import { socketService, SOCKET_EVENT_BOARD_UPDATED } from '../services/connection/socket.service'
-import { useDispatch } from 'react-redux'
 
 export function Workspace() {
   const boards = useSelector((storeState) => storeState.boardModule.boards)
   const dispatch = useDispatch()
-  const starredBoard = boards.filter((board) => board.isStarred)
-  const day = 1000 * 60 * 60 * 24
-  const recentlyViewedBoard = boards.filter(
-    (board) => Date.now() - board.lastViewed < day
-  )
 
   useEffect(() => {
     socketService.on(SOCKET_EVENT_BOARD_UPDATED, socketUpdateBoard)
-    return ()=>{
+    return () => {
       socketService.off(SOCKET_EVENT_BOARD_UPDATED, socketUpdateBoard)
     }
   }, [])
@@ -46,26 +39,33 @@ export function Workspace() {
     }
   }
 
+  // Guard against non-array boards state before calling .filter
+  if (!boards || !Array.isArray(boards)) return <Loader />
+
+  const starredBoard = boards.filter((board) => board?.isStarred)
+  const day = 1000 * 60 * 60 * 24
+  const recentlyViewedBoard = boards.filter(
+    (board) => Date.now() - (board?.lastViewed || 0) < day
+  )
+
   function onStarredBoard() {
     if (!starredBoard.length) return
-    else
-      return (
-        <h1>
-          <AiOutlineStar className="workspace-icons" /> Starred boards
-        </h1>
-      )
-  }
-  function onRecentlyViewedBoard() {
-    if (!starredBoard.length) return
-    else
-      return (
-        <h1>
-          <AiOutlineClockCircle className="workspace-icons" /> Recently viewed
-        </h1>
-      )
+    return (
+      <h1>
+        <AiOutlineStar className="workspace-icons" /> Starred boards
+      </h1>
+    )
   }
 
-  if (!boards) return <Loader />
+  function onRecentlyViewedBoard() {
+    if (!recentlyViewedBoard.length) return
+    return (
+      <h1>
+        <AiOutlineClockCircle className="workspace-icons" /> Recently viewed
+      </h1>
+    )
+  }
+
   return (
     <section className="workspace-section">
       <div className="starred-boards-container">

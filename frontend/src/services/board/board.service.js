@@ -51,8 +51,8 @@ async function query({
 
   const queryParams = '?' + filterParams + '&' + sortParams + '&' + pageParams
   try {
-    // return await httpService.get(BASE_URL + queryParams).then((res) => res)
-    return await httpService.get(BASE_URL).then((res) => res)
+    const res = await httpService.get(BASE_URL)
+    return Array.isArray(res) ? res : []
   } catch (err) {
     console.log('Cannot find boards', err)
     throw err

@@ -40,12 +40,18 @@ export function getActionUpdateBoard(board) {
 export async function loadBoards() {
   try {
     const boards = await boardService.query()
+    const safeBoards = Array.isArray(boards) ? boards : []
     store.dispatch({
       type: SET_BOARDS,
-      boards,
+      boards: safeBoards,
     })
+    return safeBoards
   } catch (err) {
     console.log('Cannot load boards', err)
+    store.dispatch({
+      type: SET_BOARDS,
+      boards: [],
+    })
     throw err
   }
 }

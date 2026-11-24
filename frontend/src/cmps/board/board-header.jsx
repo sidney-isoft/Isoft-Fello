@@ -4,11 +4,17 @@ import { AiFillStar } from 'react-icons/ai'
 import { BsThreeDots } from 'react-icons/bs'
 import { updateBoard } from '../../store/actions/board.actions'
 import { BoardMenu } from './side-menu/board-menu'
+import { BoardPermissionsModal } from './board-permissions-modal'
+import { BoardMemberInfoModal } from './board-member-info-modal'
+import { useSelector } from 'react-redux'
 
-export function BoardHeader({ board}) {
+export function BoardHeader({ board }) {
   const contentRef = useRef(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isStarred, setIsStarred] = useState(board.isStarred)
+  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false)
+  const [selectedMemberInfo, setSelectedMemberInfo] = useState(null)
+  const loggedinUser = useSelector((s) => s.userModule.user)
 
   useEffect(() => { }, [board.isStarred, isStarred])
 
@@ -30,6 +36,16 @@ export function BoardHeader({ board}) {
     updateBoard(board)
   }
 
+  // Determine if the user can edit this board
+  const userMember = board.members?.find((m) => m._id === loggedinUser?._id)
+  const isOwner = board.createdBy?._id === loggedinUser?._id
+  const canEdit =
+    loggedinUser?.role === 'globalAdmin' ||
+    loggedinUser?.role === 'boardAdmin' ||
+    isOwner ||
+    userMember?.permission === 'owner' ||
+    userMember?.permission === 'modify'
+
   return (
     <section
       className={
@@ -41,7 +57,7 @@ export function BoardHeader({ board}) {
           ref={contentRef}
           onKeyDown={(ev) => changeContent(ev)}
           onBlur={(ev) => changeContent(ev)}
-          contentEditable={true}
+          contentEditable={canEdit}
           suppressContentEditableWarning={true}
         >
           {board.title}
@@ -62,16 +78,38 @@ export function BoardHeader({ board}) {
         <div className="members-container">
           {board.members?.map((member, index) => {
             return (
-              <div key={index} className="member-img" style={{ zIndex: index }}>
+              <div
+                key={index}
+                className="member-img clickable"
+                style={{ zIndex: index, cursor: 'pointer' }}
+                onClick={(ev) => {
+                  ev.stopPropagation()
+                  setSelectedMemberInfo({
+                    member,
+                    anchorRect: ev.currentTarget.getBoundingClientRect(),
+                  })
+                }}
+              >
                 <img
                   src={member.imgUrl}
                   alt={member.fullname}
-                  title={member.fullname}
+                  title={`${member.fullname} — click to view info`}
                 />
               </div>
             )
           })}
         </div>
+
+        {/* Share / Permissions button */}
+        <button
+          className="board-header-share-btn"
+          style={board?.style?.isLight ? { color: '#172B4D', background: 'rgba(23,43,77,0.1)' } : { color: 'white', background: 'rgba(255,255,255,0.2)' }}
+          onClick={() => setIsPermissionsOpen(true)}
+          title="Manage board members & permissions"
+        >
+          Share
+        </button>
+
         <span className="board-header-btn-divider"></span>
         <button
           style={board?.style?.isLight ? { color: '#172B4D ' } : { color: 'white' }}
@@ -90,6 +128,23 @@ export function BoardHeader({ board}) {
           />
         )}
       </div>
+
+      {isPermissionsOpen && (
+        <BoardPermissionsModal
+          board={board}
+          onClose={() => setIsPermissionsOpen(false)}
+        />
+      )}
+
+      {selectedMemberInfo && (
+        <BoardMemberInfoModal
+          member={selectedMemberInfo.member}
+          board={board}
+          anchorRect={selectedMemberInfo.anchorRect}
+          onClose={() => setSelectedMemberInfo(null)}
+          onOpenPermissions={canEdit ? () => setIsPermissionsOpen(true) : null}
+        />
+      )}
     </section>
   )
 }

@@ -8,7 +8,9 @@ export const SET_USER = 'SET_USER'
 export const SET_WATCHED_USER = 'SET_WATCHED_USER'
 export const REMOVE_USER = 'REMOVE_USER'
 export const SET_USERS = 'SET_USERS'
+export const ADD_USER = 'ADD_USER'
 export const SET_SCORE = 'SET_SCORE'
+export const UPDATE_USER_ROLE = 'UPDATE_USER_ROLE'
 
 const initialState = {
   count: 10,
@@ -44,13 +46,21 @@ export function userReducer(state = initialState, action) {
     case SET_USERS:
       newState = { ...state, users: action.users }
       break
+    case ADD_USER:
+      newState = { ...state, users: [action.user, ...state.users] }
+      break
+    case UPDATE_USER_ROLE:
+      newState = {
+        ...state,
+        users: state.users.map((u) =>
+          u._id === action.userId ? { ...u, role: action.role } : u
+        ),
+      }
+      break
     case SET_SCORE:
       newState = { ...state, user: { ...state.user, score: action.score } }
       break
     default:
   }
-  // For debug:
-  // window.userState = newState
-  // console.log('State:', newState)
   return newState
 }

@@ -7,6 +7,7 @@ import { UserDetails } from './pages/user/user-details'
 import { BoardIndex } from './pages/board/board-index'
 import { TaskDetails } from './cmps/board/group/task/task-details'
 import { Home } from './pages/home'
+import { AdminIndex } from './pages/user/admin-index'
 
 //? Routes
 import routes from './routes'
@@ -21,6 +22,9 @@ export function RootCmp() {
   const protectedElement = (element) =>
     user ? element : <Navigate to="/login" replace state={{ from: location }} />
 
+  const adminElement = (element) =>
+    (user?.role === 'globalAdmin' || user?.isAdmin) ? element : <Navigate to="/board" replace />
+
   return (
     <div className="main-layout app">
       {user && <AppHeader type={'main'} />}
@@ -34,6 +38,7 @@ export function RootCmp() {
             />
           </Route>
           <Route element={protectedElement(<UserDetails />)} path="/user" />
+          <Route element={adminElement(<AdminIndex />)} path="/admin" />
           <Route
             element={user ? <Navigate to="/board" replace /> : <LoginSignup />}
             path="/login"

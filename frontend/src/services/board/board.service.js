@@ -18,6 +18,9 @@ export const boardService = {
   getEmptyBoard,
   getImages,
   getColors,
+  updateMemberPermission,
+  removeBoardMember,
+  addBoardMember,
 }
 
 //? Query - List/Filtering/Sorting/Paging
@@ -180,4 +183,42 @@ function getImages() {
 
 function getColors() {
   return ['#0079bf', '#d29034', '#519839', '#b04632', '#89609e']
+}
+
+//? Board Member Permission Management
+async function updateMemberPermission(boardId, memberId, permission) {
+  try {
+    return await httpService.put(`${BASE_URL}${boardId}/member/${memberId}/permission`, { permission })
+  } catch (err) {
+    console.log('Cannot update member permission', err)
+    throw err
+  }
+}
+
+async function removeBoardMember(boardId, memberId) {
+  try {
+    return await httpService.delete(`${BASE_URL}${boardId}/member/${memberId}`)
+  } catch (err) {
+    console.log('Cannot remove board member', err)
+    throw err
+  }
+}
+
+async function addBoardMember(board, memberToAdd, permission = 'read') {
+  try {
+    const member = {
+      _id: memberToAdd._id,
+      fullname: memberToAdd.fullname,
+      imgUrl: memberToAdd.imgUrl,
+      permission,
+    }
+    // Check if already a member
+    const alreadyMember = board.members?.find((m) => m._id === member._id)
+    if (alreadyMember) throw new Error('User is already a member')
+    const updatedBoard = { ...board, members: [...(board.members || []), member] }
+    return await save(updatedBoard)
+  } catch (err) {
+    console.log('Cannot add board member', err)
+    throw err
+  }
 }

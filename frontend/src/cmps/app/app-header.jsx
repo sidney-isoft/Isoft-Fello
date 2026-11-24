@@ -71,6 +71,14 @@ export function AppHeader({ type }) {
               {route.label}
             </NavLink>
           ))}
+          {(user?.role === 'globalAdmin' || user?.isAdmin) && (
+            <NavLink
+              to="/admin"
+              style={board?.style?.isLight ? { color: 'rgb(23, 43, 77)' } : { color: 'white' }}
+            >
+              Admin
+            </NavLink>
+          )}
         </nav>
 
         <div className='create-dropdown'>
@@ -93,6 +101,16 @@ export function AppHeader({ type }) {
               {isUserMenuOpen && (
                 <div className="user-menu" role="menu">
                   <span className="user-menu-name">{user.fullname}</span>
+                  <span className="user-menu-role">{user.role || 'user'}</span>
+                  {(user.role === 'globalAdmin' || user.isAdmin) && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => { setIsUserMenuOpen(false); navigate('/admin') }}
+                    >
+                      Admin Panel
+                    </button>
+                  )}
                   <button type="button" role="menuitem" onClick={onLogout}>
                     Log out
                   </button>

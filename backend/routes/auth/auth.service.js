@@ -69,6 +69,7 @@ function getLoginToken(user) {
     fullname: user.fullname,
     isAdmin: user.isAdmin,
     imgUrl: user.imgUrl,
+    role: user.role || 'user',
   }
   return cryptr.encrypt(JSON.stringify(userInfo))
 }

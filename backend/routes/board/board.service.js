@@ -12,24 +12,40 @@ module.exports = {
   add,
   update,
   remove,
+  updateBoardMemberPermission,
+  removeBoardMember,
 };
 
 //? Query - List/Filtering/Sorting/Paging
-async function query(query, ownerId) {
+// Returns boards owned by the user OR boards where the user is a member with any permission
+async function query(filterBy, userId, userRole) {
   try {
     //? DONE: FILTERING/SORTING/PAGING
-    const sortCriteria = _buildSortCriteria(query);
-    const filterCriteria = {
-      ..._buildFilterCriteria(query),
-      "createdBy._id": ownerId.toString(),
-    };
+    const sortCriteria = _buildSortCriteria(filterBy);
+    const baseFilter = _buildFilterCriteria(filterBy);
+
+    let filterCriteria;
+    // Board admins & global admins see all boards; regular users only see their own, boards they were added to, or public boards
+    if (userRole === "globalAdmin" || userRole === "boardAdmin") {
+      filterCriteria = baseFilter;
+    } else {
+      filterCriteria = {
+        ...baseFilter,
+        $or: [
+          { "createdBy._id": userId.toString() },
+          { "members._id": userId.toString() },
+          { isPublic: true },
+        ],
+      };
+    }
+
     const collection = await dbService.getCollection(BOARDS_DB);
     let boards = await collection
       .find(filterCriteria)
       .sort(sortCriteria)
       .toArray();
 
-    return _setPage(query, boards);
+    return _setPage(filterBy, boards);
   } catch (err) {
     logger.error("Cannot find boards", err);
     throw err;
@@ -49,7 +65,7 @@ async function add(board) {
 }
 
 //? Update - Edit
-async function update(board, ownerId) {
+async function update(board, userId, userRole) {
   try {
     const {
       title,
@@ -62,6 +78,8 @@ async function update(board, ownerId) {
       activities,
       isStarred,
       lastViewed,
+      isPublic,
+      createdBy,
     } = board;
     const boardToSave = {
       title,
@@ -74,15 +92,35 @@ async function update(board, ownerId) {
       activities,
       isStarred,
       lastViewed,
+      isPublic: !!isPublic,
+      ...(createdBy ? { createdBy } : {}),
     };
+
     const collection = await dbService.getCollection(BOARDS_DB);
-    const result = await collection.updateOne(
-      {
+
+    // Build the match query: owner can always update; members with Modify/Owner permission can update;
+    // boardAdmin/globalAdmin can update any board
+    let matchQuery;
+    if (userRole === "globalAdmin" || userRole === "boardAdmin") {
+      matchQuery = { _id: new ObjectId(board._id) };
+    } else {
+      matchQuery = {
         _id: new ObjectId(board._id),
-        "createdBy._id": ownerId.toString(),
-      },
-      { $set: boardToSave }
-    );
+        $or: [
+          { "createdBy._id": userId.toString() },
+          {
+            members: {
+              $elemMatch: {
+                _id: userId.toString(),
+                permission: { $in: ["modify", "owner"] },
+              },
+            },
+          },
+        ],
+      };
+    }
+
+    const result = await collection.updateOne(matchQuery, { $set: boardToSave });
     if (!result.matchedCount) return null;
     return board;
   } catch (err) {
@@ -92,15 +130,26 @@ async function update(board, ownerId) {
 }
 
 //? Get - Read
-async function getById(boardId, ownerId) {
+async function getById(boardId, userId, userRole) {
   try {
     if (!ObjectId.isValid(boardId)) return null;
     const collection = await dbService.getCollection(BOARDS_DB);
-    const board = await collection.findOne({
-      _id: new ObjectId(boardId),
-      "createdBy._id": ownerId.toString(),
-    });
-    // TODO: Return error if boardId is not found
+
+    let matchQuery;
+    if (userRole === "globalAdmin" || userRole === "boardAdmin") {
+      matchQuery = { _id: new ObjectId(boardId) };
+    } else {
+      matchQuery = {
+        _id: new ObjectId(boardId),
+        $or: [
+          { "createdBy._id": userId.toString() },
+          { "members._id": userId.toString() },
+          { isPublic: true },
+        ],
+      };
+    }
+
+    const board = await collection.findOne(matchQuery);
     return board;
   } catch (err) {
     logger.error(`While finding board ${boardId}:`, err);
@@ -109,19 +158,116 @@ async function getById(boardId, ownerId) {
 }
 
 //? Remove - Delete
-async function remove(boardId, ownerId) {
+async function remove(boardId, userId, userRole) {
   try {
     if (!ObjectId.isValid(boardId)) return false;
     const collection = await dbService.getCollection(BOARDS_DB);
-    const result = await collection.deleteOne({
-      _id: new ObjectId(boardId),
-      "createdBy._id": ownerId.toString(),
-    });
+
+    let matchQuery;
+    if (userRole === "globalAdmin" || userRole === "boardAdmin") {
+      matchQuery = { _id: new ObjectId(boardId) };
+    } else {
+      matchQuery = {
+        _id: new ObjectId(boardId),
+        "createdBy._id": userId.toString(),
+      };
+    }
+
+    const result = await collection.deleteOne(matchQuery);
     if (!result.deletedCount) return false;
-    // TODO: Return error if boardId is not found
     return boardId;
   } catch (err) {
     logger.error(`Cannot remove board ${boardId}`, err);
+    throw err;
+  }
+}
+
+//? Update a member's permission on a board
+async function updateBoardMemberPermission(boardId, memberId, permission, requesterId, requesterRole) {
+  try {
+    if (!ObjectId.isValid(boardId)) return null;
+    const collection = await dbService.getCollection(BOARDS_DB);
+
+    // Only the board owner (createdBy) or globalAdmin/boardAdmin can change permissions
+    let matchQuery;
+    if (requesterRole === "globalAdmin" || requesterRole === "boardAdmin") {
+      matchQuery = { _id: new ObjectId(boardId) };
+    } else {
+      matchQuery = {
+        _id: new ObjectId(boardId),
+        $or: [
+          { "createdBy._id": requesterId.toString() },
+          {
+            members: {
+              $elemMatch: {
+                _id: requesterId.toString(),
+                permission: "owner",
+              },
+            },
+          },
+        ],
+      };
+    }
+
+    const result = await collection.updateOne(
+      matchQuery,
+      {
+        $set: { "members.$[member].permission": permission },
+      },
+      {
+        arrayFilters: [
+          {
+            $or: [
+              { "member._id": memberId.toString() },
+              ...(ObjectId.isValid(memberId) ? [{ "member._id": new ObjectId(memberId) }] : []),
+            ],
+          },
+        ],
+      }
+    );
+
+    if (!result.matchedCount) return null;
+    return { boardId, memberId, permission };
+  } catch (err) {
+    logger.error(`Cannot update member permission on board ${boardId}`, err);
+    throw err;
+  }
+}
+
+//? Remove a member from a board
+async function removeBoardMember(boardId, memberId, requesterId, requesterRole) {
+  try {
+    if (!ObjectId.isValid(boardId)) return null;
+    const collection = await dbService.getCollection(BOARDS_DB);
+
+    let matchQuery;
+    if (requesterRole === "globalAdmin" || requesterRole === "boardAdmin") {
+      matchQuery = { _id: new ObjectId(boardId) };
+    } else {
+      matchQuery = {
+        _id: new ObjectId(boardId),
+        $or: [
+          { "createdBy._id": requesterId.toString() },
+          {
+            members: {
+              $elemMatch: {
+                _id: requesterId.toString(),
+                permission: "owner",
+              },
+            },
+          },
+        ],
+      };
+    }
+
+    const result = await collection.updateOne(matchQuery, {
+      $pull: { members: { _id: memberId.toString() } },
+    });
+
+    if (!result.matchedCount) return null;
+    return { boardId, memberId };
+  } catch (err) {
+    logger.error(`Cannot remove member from board ${boardId}`, err);
     throw err;
   }
 }

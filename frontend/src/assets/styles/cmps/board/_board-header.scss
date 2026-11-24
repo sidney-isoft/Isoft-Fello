@@ -7,11 +7,10 @@
   padding-left: 24px;
   padding-right: 4px;
   transition: 0.5s;
-  //
-
 
   .btns-container {
     display: flex;
+    align-items: center;
 
     .board-header-btn-divider {
       border-left: 2px solid rgba(255, 255, 255, 0.31);
@@ -21,7 +20,6 @@
     }
 
     button {
-      // display: flex;
       align-items: center;
       gap: 5px;
     }
@@ -36,6 +34,20 @@
       & svg {
         font-size: 14px;
       }
+    }
+  }
+
+  .board-header-share-btn {
+    font-size: 14px;
+    font-weight: 400;
+    padding: 4px 10px;
+    border-radius: rem(2.5px);
+    cursor: pointer;
+    transition: background-color 85ms ease;
+    margin-right: 4px;
+
+    &:hover {
+      filter: brightness(1.15);
     }
   }
 
@@ -54,7 +66,6 @@
       & img {
         width: 100%;
         border-radius: 50%;
-        // border-left: #767676 1px solid;
         box-shadow: -1px 0px 1px 0px rgb(255, 255, 255);
       }
     }
@@ -129,9 +140,6 @@
     border-radius: rem(2.5px);
     cursor: pointer;
     padding:4px 9px;
-    // color: $clr2;
-    // content: attr(data-content);
-    // filter: hue-rotate(60deg);
 
     transition-property: background-color;
     transition-duration: 85ms;
@@ -169,5 +177,378 @@
 
  .open {
   margin-right: 301px;
+}
+
+// Board Permissions Modal
+.board-permissions-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(9, 30, 66, 0.3);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+}
+
+.board-permissions-modal {
+  background: $clr-white;
+  border-radius: 3px;
+  box-shadow: rgb(0 0 0 / 25%) 0 8px 24px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  color: $clr-txt;
+
+  .perm-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebecf0;
+
+    h3 {
+      font-size: rem(14px);
+      font-weight: 600;
+      color: $clr-txt;
+      margin: 0;
+    }
+
+    .perm-modal-close {
+      background: transparent;
+      color: $modal-txt-clr;
+      font-size: 16px;
+      padding: 2px 6px;
+      cursor: pointer;
+      border-radius: 3px;
+      
+      &:hover {
+        background: #f4f5f7;
+        color: $clr-txt;
+      }
+    }
+  }
+
+  .perm-add-member {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebecf0;
+    position: relative;
+
+    input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #dfe1e6;
+      border-radius: 3px;
+      font-size: rem(14px);
+      background: $input-bg-clr;
+      color: $clr-txt;
+      box-sizing: border-box;
+      outline: none;
+
+      &:focus {
+        border-color: $clr4;
+        box-shadow: 0 0 0 2px rgba(0, 121, 191, 0.2);
+      }
+    }
+  }
+
+  .perm-search-results {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    background: $clr-white;
+    border: 1px solid #dfe1e6;
+    border-radius: 3px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    list-style: none;
+    padding: 4px 0;
+    margin: 0;
+    z-index: 10;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 85ms ease;
+
+      &:hover {
+        background: #f4f5f7;
+      }
+
+      img {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .perm-search-name {
+        font-size: rem(13px);
+        font-weight: 500;
+        color: $clr-txt;
+      }
+
+      .perm-search-username {
+        font-size: rem(12px);
+        color: $modal-txt-clr;
+      }
+    }
+  }
+
+  .perm-member-list {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+  }
+
+  .perm-member-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    transition: background 85ms ease;
+
+    &:hover {
+      background: #f4f5f7;
+    }
+
+    .perm-member-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .perm-member-info {
+      flex: 1;
+      min-width: 0;
+
+      .perm-member-name {
+        display: block;
+        font-size: rem(13px);
+        font-weight: 500;
+        color: $clr-txt;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .perm-you-badge {
+        font-size: rem(12px);
+        color: $modal-txt-clr;
+        font-weight: 400;
+      }
+
+      .perm-creator-badge {
+        display: inline-block;
+        font-size: rem(11px);
+        color: #0052cc;
+        background: #deebff;
+        padding: 1px 6px;
+        border-radius: 20px;
+        font-weight: 500;
+        margin-top: 2px;
+      }
+    }
+
+    .perm-member-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .perm-select {
+      padding: 4px 6px;
+      border: 1px solid #dfe1e6;
+      border-radius: 3px;
+      font-size: rem(13px);
+      color: $clr-txt;
+      background: $clr-white;
+      cursor: pointer;
+      outline: none;
+
+      &:hover, &:focus {
+        border-color: $clr4;
+      }
+    }
+
+    .perm-label {
+      font-size: rem(13px);
+      color: $modal-txt-clr;
+      padding: 4px 8px;
+      background: #f4f5f7;
+      border-radius: 3px;
+    }
+
+    .perm-remove-btn {
+      background: transparent;
+      color: #bf2600;
+      font-size: 14px;
+      padding: 4px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      line-height: 1;
+      border: none;
+
+      &:hover {
+        background: #fff0eb;
+      }
+    }
+  }
+}
+
+// Board Member Info Popover Modal
+.board-member-info-modal {
+  position: fixed;
+  z-index: 250;
+  width: 280px;
+  background: $clr-white;
+  border-radius: $border-radius;
+  box-shadow: 0 8px 24px rgba(9, 30, 66, 0.25), 0 0 0 1px rgba(9, 30, 66, 0.08);
+  color: $clr-txt;
+  text-align: left;
+  overflow: hidden;
+
+  .member-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid #ebecf0;
+
+    h4 {
+      margin: 0;
+      font-size: rem(13px);
+      font-weight: 600;
+      color: $modal-txt-clr;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .member-info-close {
+      background: transparent;
+      border: none;
+      color: $modal-txt-clr;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 3px;
+
+      &:hover {
+        background: #f4f5f7;
+        color: $clr-txt;
+      }
+    }
+  }
+
+  .member-info-body {
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+
+    .member-info-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 1px 3px rgba(9, 30, 66, 0.15);
+    }
+
+    .member-info-names {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .member-info-fullname {
+        font-size: rem(15px);
+        font-weight: 600;
+        color: $clr-txt;
+      }
+
+      .member-info-username {
+        font-size: rem(12px);
+        color: $modal-txt-clr;
+      }
+    }
+
+    .member-info-badges {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 0;
+      border-top: 1px solid #ebecf0;
+      border-bottom: 1px solid #ebecf0;
+      text-align: left;
+
+      .info-badge-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: rem(12px);
+
+        .info-badge-label {
+          color: $modal-txt-clr;
+          font-weight: 500;
+        }
+
+        .perm-badge {
+          display: inline-block;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: rem(11px);
+          font-weight: 600;
+
+          &.perm-owner {
+            background: #deebff;
+            color: #0747a6;
+          }
+
+          &.perm-modify {
+            background: #fff0b3;
+            color: #172b4d;
+          }
+
+          &.perm-read {
+            background: #eae6ff;
+            color: #403294;
+          }
+        }
+
+        .board-creator-pill {
+          background: #e3fcef;
+          color: #006644;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: rem(11px);
+          font-weight: 600;
+        }
+      }
+    }
+
+    .member-info-manage-btn {
+      width: 100%;
+      padding: 6px 12px;
+      background: #f4f5f7;
+      border: 1px solid #dfe1e6;
+      border-radius: $border-radius;
+      font-size: rem(13px);
+      color: $clr-txt;
+      cursor: pointer;
+      transition: background 85ms ease;
+
+      &:hover {
+        background: #ebecf0;
+      }
+    }
+  }
 }
 

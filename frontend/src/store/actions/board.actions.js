@@ -15,9 +15,7 @@ import {
   UNDO_REMOVE_BOARD,
   UPDATE_BOARD,
 } from '../reducers/board.reducer.js'
-import { SET_SCORE } from '../reducers/user.reducer.js'
-
-// Action Creators:
+import { SET_SCORE } from '../reducers/user.reducer.js'// Action Creators:
 export function getActionRemoveBoard(boardId) {
   return {
     type: REMOVE_BOARD,

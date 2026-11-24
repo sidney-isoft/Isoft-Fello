@@ -1,0 +1,594 @@
+.admin-index-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: calc(100vh - 44px);
+  text-align: left;
+
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .admin-header-title {
+      text-align: left;
+
+      h1 {
+        color: $clr2;
+        font-size: rem(24px);
+        font-weight: 700;
+        margin-bottom: 4px;
+        text-align: left;
+      }
+
+      .admin-subtitle {
+        color: $modal-txt-clr;
+        font-size: rem(14px);
+        margin: 0;
+        text-align: left;
+      }
+    }
+
+    .add-user-btn {
+      white-space: nowrap;
+    }
+  }
+
+  .admin-add-user-form {
+    background: $clr-white;
+    border-radius: $border-radius;
+    box-shadow: 0 1px 3px rgba(9, 30, 66, 0.12);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    border: 1px solid #dfe1e6;
+    text-align: left;
+
+    h3 {
+      font-size: rem(16px);
+      font-weight: 600;
+      color: $clr-txt;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .add-user-inputs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+
+      input,
+      select {
+        padding: 8px 12px;
+        border: 1px solid #dfe1e6;
+        border-radius: $border-radius;
+        font-size: rem(13px);
+        background: $input-bg-clr;
+        color: $clr-txt;
+        outline: none;
+
+        &:focus {
+          border-color: $clr4;
+          box-shadow: 0 0 0 2px rgba(0, 121, 191, 0.2);
+        }
+      }
+
+      select {
+        background: $clr-white;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .admin-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .admin-search {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #dfe1e6;
+      border-radius: $border-radius;
+      font-size: rem(14px);
+      background: $input-bg-clr;
+      color: $clr-txt;
+      outline: none;
+
+      &:focus {
+        border-color: $clr4;
+        box-shadow: 0 0 0 2px rgba(0, 121, 191, 0.2);
+      }
+    }
+
+    .admin-user-count {
+      font-size: rem(13px);
+      color: $modal-txt-clr;
+      white-space: nowrap;
+    }
+  }
+
+  // Bulleted roles description legend
+  .admin-roles-legend {
+    list-style: disc inside;
+    margin: 0 0 24px 0;
+    padding: 14px 18px;
+    background: #f4f5f7;
+    border-radius: $border-radius;
+    border: 1px solid #ebecf0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+
+    li {
+      color: #172b4d;
+      font-size: rem(13px);
+      line-height: 22px;
+      text-align: left;
+
+      .legend-desc {
+        margin-left: 8px;
+        color: #42526e;
+      }
+    }
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: rem(12px);
+    font-weight: 600;
+    white-space: nowrap;
+
+    &.role-global-admin {
+      background: #e3fcef;
+      color: #006644;
+      border: 1px solid #abf5d1;
+    }
+
+    &.role-board-admin {
+      background: #deebff;
+      color: #0747a6;
+      border: 1px solid #b3d4ff;
+    }
+
+    &.role-user {
+      background: #eae6ff;
+      color: #403294;
+      border: 1px solid #c0b6f2;
+    }
+  }
+
+  .admin-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: $modal-txt-clr;
+    font-size: rem(15px);
+    background: $clr-white;
+    border-radius: $border-radius;
+    box-shadow: 0 1px 3px rgba(9, 30, 66, 0.12);
+  }
+
+  .admin-user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .admin-user-item {
+    background: $clr-white;
+    border-radius: $border-radius;
+    box-shadow: 0 1px 3px rgba(9, 30, 66, 0.12);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    transition: box-shadow 85ms ease;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba(9, 30, 66, 0.2);
+    }
+  }
+
+  .admin-user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .admin-user-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .admin-user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(9, 30, 66, 0.15);
+    }
+
+    .admin-user-details {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+
+      .admin-user-name {
+        font-weight: 600;
+        color: $clr-txt;
+        font-size: rem(15px);
+        text-align: left;
+      }
+
+      .admin-user-username {
+        font-size: rem(13px);
+        color: $modal-txt-clr;
+        text-align: left;
+      }
+    }
+  }
+
+  .admin-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    border-top: 1px solid #f4f5f7;
+  }
+
+  .admin-label {
+    font-size: rem(13px);
+    color: $modal-txt-clr;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+
+  .admin-role-edit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+
+    .admin-role-btn {
+      padding: 4px 10px;
+      border-radius: $border-radius;
+      border: 1px solid #dfe1e6;
+      background: transparent;
+      color: $clr-txt;
+      font-size: rem(13px);
+      cursor: pointer;
+      transition: background 85ms ease;
+
+      &:hover {
+        background: #f4f5f7;
+      }
+
+      &.active {
+        background: $clr4;
+        color: $clr-white;
+        border-color: $clr4;
+      }
+    }
+  }
+
+  .admin-reset-pwd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 0 2px;
+    border-top: 1px solid #ebecf0;
+
+    input {
+      padding: 6px 10px;
+      border: 1px solid #dfe1e6;
+      border-radius: $border-radius;
+      font-size: rem(13px);
+      background: $input-bg-clr;
+      color: $clr-txt;
+      outline: none;
+
+      &:focus {
+        border-color: $clr4;
+        box-shadow: 0 0 0 2px rgba(0, 121, 191, 0.2);
+      }
+    }
+  }
+
+  .admin-btn {
+    padding: 6px 12px;
+    border-radius: $border-radius;
+    font-size: rem(13px);
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 85ms ease;
+    border: none;
+
+    &.admin-btn-edit {
+      background: $allowed-btn-bg-clr;
+      color: $clr-white;
+
+      &:hover {
+        background: $allowed-btn-bg-clr-hover;
+      }
+    }
+
+    &.admin-btn-pwd {
+      background: #f4f5f7;
+      color: $clr-txt;
+      border: 1px solid #dfe1e6;
+
+      &:hover {
+        background: #ebecf0;
+      }
+    }
+
+    &.admin-btn-remove {
+      background: transparent;
+      color: #bf2600;
+      border: 1px solid #ffbdad;
+
+      &:hover {
+        background: #fff0eb;
+      }
+    }
+
+    &.admin-btn-cancel {
+      background: transparent;
+      color: $modal-txt-clr;
+      border: 1px solid #dfe1e6;
+
+      &:hover {
+        background: #f4f5f7;
+      }
+    }
+
+    &.admin-btn-danger {
+      background: #de350b;
+      color: #fff;
+      border: none;
+      font-weight: 600;
+
+      &:hover {
+        background: #bf2600;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// Delete User & Manage Boards Modal
+.delete-user-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(9, 30, 66, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 50px;
+  overflow-y: auto;
+}
+
+.delete-user-modal {
+  background: $clr-white;
+  border-radius: 4px;
+  box-shadow: 0 12px 32px rgba(9, 30, 66, 0.35);
+  width: 600px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: $clr-txt;
+  text-align: left;
+
+  .delete-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #ebecf0;
+
+    h3 {
+      margin: 0;
+      font-size: rem(18px);
+      font-weight: 600;
+      color: $clr2;
+    }
+
+    .delete-modal-close {
+      background: transparent;
+      border: none;
+      color: $modal-txt-clr;
+      font-size: 16px;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 3px;
+
+      &:hover {
+        background: #f4f5f7;
+        color: $clr-txt;
+      }
+    }
+  }
+
+  .delete-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+
+    .delete-no-boards {
+      p {
+        font-size: rem(15px);
+        color: $clr-txt;
+        margin-bottom: 8px;
+      }
+
+      .delete-subtext {
+        font-size: rem(13px);
+        color: $modal-txt-clr;
+      }
+    }
+
+    .delete-warning-banner {
+      background: #fff0b3;
+      color: #172b4d;
+      padding: 12px 14px;
+      border-radius: 3px;
+      font-size: rem(13px);
+      line-height: 20px;
+      margin-bottom: 16px;
+      border-left: 4px solid #ffab00;
+    }
+
+    .quick-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding: 10px 12px;
+      background: #f4f5f7;
+      border-radius: 3px;
+
+      .quick-actions-label {
+        font-size: rem(12px);
+        font-weight: 600;
+        color: $modal-txt-clr;
+        text-transform: uppercase;
+      }
+
+      .quick-action-btn {
+        padding: 4px 10px;
+        background: $clr-white;
+        border: 1px solid #dfe1e6;
+        border-radius: 3px;
+        font-size: rem(12px);
+        cursor: pointer;
+        color: $clr-txt;
+        transition: background 85ms ease;
+
+        &:hover {
+          background: #ebecf0;
+        }
+
+        &.quick-action-danger {
+          color: #bf2600;
+          border-color: #ffbdad;
+
+          &:hover {
+            background: #fff0eb;
+          }
+        }
+      }
+    }
+
+    .delete-boards-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .delete-board-item {
+      border: 1px solid #dfe1e6;
+      border-radius: 4px;
+      padding: 14px 16px;
+      background: #fafbfc;
+
+      .delete-board-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+
+        .delete-board-thumb {
+          width: 32px;
+          height: 22px;
+          border-radius: 2px;
+          display: inline-block;
+          flex-shrink: 0;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        .delete-board-title {
+          font-weight: 600;
+          font-size: rem(14px);
+          color: $clr-txt;
+        }
+      }
+
+      .delete-board-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-left: 4px;
+
+        .delete-option-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: rem(13px);
+          color: $clr-txt;
+          cursor: pointer;
+
+          &.label-danger {
+            color: #bf2600;
+          }
+
+          input[type='radio'] {
+            cursor: pointer;
+            accent-color: $clr4;
+          }
+
+          .delete-owner-select {
+            padding: 4px 8px;
+            border: 1px solid #dfe1e6;
+            border-radius: 3px;
+            font-size: rem(12px);
+            background: $clr-white;
+            color: $clr-txt;
+            cursor: pointer;
+            margin-left: 4px;
+
+            &:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .delete-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid #ebecf0;
+    background: #fafbfc;
+  }
+}

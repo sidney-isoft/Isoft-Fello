@@ -4,6 +4,7 @@ const express = require('express')
 const {
   requireAuth,
   requireAdmin,
+  requireGlobalAdmin,
 } = require('../../middlewares/requireAuth.middleware')
 //? Controller
 const {
@@ -11,16 +12,21 @@ const {
   getUsers,
   deleteUser,
   updateUser,
+  updateUserRole,
+  resetUserPassword,
+  addUser,
 } = require('./user.controller')
 //? Config
 const router = express.Router()
 
-// middleware that is specific to this router
-// router.use(requireAuth)
-
-router.get('/', getUsers)
-router.get('/:id', getUser)
+router.get('/', requireAuth, getUsers)
+router.get('/:id', requireAuth, getUser)
+router.post('/', requireAuth, requireGlobalAdmin, addUser)
 router.put('/:id', requireAuth, updateUser)
-router.delete('/:id', requireAuth, requireAdmin, deleteUser)
+router.delete('/:id', requireAuth, requireGlobalAdmin, deleteUser)
+
+// Admin-only routes
+router.put('/:id/role', requireAuth, requireGlobalAdmin, updateUserRole)
+router.put('/:id/reset-password', requireAuth, requireGlobalAdmin, resetUserPassword)
 
 module.exports = router

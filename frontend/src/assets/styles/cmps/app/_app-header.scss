@@ -57,6 +57,18 @@
         display: block;
         padding: 8px;
         font-size: 0.9rem;
+        color: #172b4d;
+        font-weight: 600;
+        border-bottom: 1px solid #e1e4e8;
+        margin-bottom: 4px;
+      }
+
+      .user-menu-role {
+        display: block;
+        padding: 2px 8px 8px;
+        font-size: 0.75rem;
+        color: #5e6c84;
+        text-transform: capitalize;
       }
 
       button {
@@ -64,6 +76,7 @@
         padding: 8px;
         text-align: left;
         background: transparent;
+        color: #172b4d;
         cursor: pointer;
 
         &:hover {
